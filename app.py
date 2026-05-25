@@ -1,6 +1,7 @@
 import streamlit as st
 import joblib
 import pandas as pd
+import numpy as np
 
 # ======================
 # CONFIG
@@ -11,6 +12,46 @@ st.set_page_config(
     page_icon="🔐",
     layout="wide"
 )
+
+# ======================
+# SEMUA KOLOM FITUR (87 kolom, sesuai training)
+# ======================
+
+ALL_FEATURES = [
+    'dur', 'Protocol', 'Length', 'Source Host', 'Destination Host',
+    'Sender IP address', 'Target IP address', 'Opcode', 'checksom(ICMP)',
+    'Sequence Number (LE)', 'Sequence Number (BE)', 'File Data',
+    'Content length', 'Request URI Query', 'Request Method',
+    'Full Request URI', 'Request Version', 'Response', 'Ack No',
+    'Ack No (RAW)', 'Checksum(TCP)', 'Connection Finish ',
+    'Connection Reset', 'Connection Establish Request',
+    'Connection Establish Ack', 'Source Port', 'Destination Port',
+    'TCPFlags', 'Acknowledgment', 'TCP Segment Length', 'TCP Options',
+    'TCP Payload', 'TCP Seq No', 'Src or Drc port', 'Stream index',
+    'Time since previous frame', 'Query Name', 'DNS retransmission',
+    'DNS query retransmission', 'DNS query retransmission in',
+    'LG bit', 'IG bit', 'LG bit.1', 'Duplicate IP address configured',
+    'Time to Live', 'Conversation completeness', 'Push', 'Content Type',
+    'This is an ACK to the segment in frame', 'ECN-Echo', 'Mode',
+    'Type', 'Type.1', 'Window', 'Echo data', 'Accept', 'Status Code',
+    'Transaction ID', 'Handshake Type', 'Flags', 'Packet Type',
+    'MSS Value', 'Message type', 'Timestamp value', 'TSecr',
+    'TCP Option - SACK permitted', 'Response time', 'No response seen',
+    'Kind', 'Duplicate ACK #', 'This frame is a (suspected) retransmission',
+    'Previous segment(s) not captured (common at capture start)',
+    'FTP Data', 'Bytes in flight', 'Request command', 'Request command.1',
+    'BER Error: length is not valid', 'Length.1', 'Flags.1',
+    'Packet Length (encrypted)', 'Direction',
+    'TCP Option - Maximum segment size', 'Data', 'Checksum',
+    'CDATA', 'Label', 'Attack_Category'
+]
+
+# 10 fitur paling penting untuk ditampilkan di input manual
+TOP_FEATURES = [
+    'dur', 'Length', 'Source Port', 'Destination Port',
+    'Time to Live', 'TCP Segment Length', 'TCP Payload',
+    'Bytes in flight', 'Acknowledgment', 'TCP Seq No'
+]
 
 # ======================
 # LOAD MODEL
@@ -75,15 +116,16 @@ with col1:
     with st.expander("📊 Balanced Dataset"):
         st.markdown("**IoT Vulnerability Dataset**")
         st.markdown("- Sumber: Mendeley Data (Preprocessed)")
-        st.markdown("- Kelas: Normal + berbagai serangan IoT")
+        st.markdown("- Jumlah fitur: **87 fitur** jaringan IoT")
+        st.markdown("- Kelas target: `Attack_sub_category`")
+        st.markdown("- Kelas: Normal + berbagai jenis serangan IoT")
         st.markdown("- Dataset telah di-*balance* agar tiap kelas proporsional")
-        st.markdown("- Format: CSV, siap pakai tanpa preprocessing tambahan")
 
 with col2:
     with st.expander("🌲 Random Forest"):
         st.markdown("**Random Forest Classifier**")
         st.markdown("- Algoritma ensemble berbasis Decision Tree")
-        st.markdown("- Tahan terhadap overfitting")
+        st.markdown("- `n_estimators=100`, `max_depth=10`")
         st.markdown("- Mendukung `predict_proba` untuk probabilitas kelas")
         st.markdown("- Dioptimasi via GridSearchCV / RandomizedSearchCV")
         st.markdown("- Cross Validation: **Stratified K-Fold (5 Fold)**")
@@ -91,51 +133,46 @@ with col2:
 with col3:
     with st.expander("⚙️ Embedded Feature Selection"):
         st.markdown("**SelectFromModel (Embedded Method)**")
-        st.markdown("- Seleksi fitur berdasarkan *feature importance* dari Random Forest")
-        st.markdown("- Terintegrasi di dalam Pipeline → **No Data Leakage**")
-        st.markdown("- Fitur dengan importance di bawah threshold otomatis dibuang")
-        st.markdown("- Urutan Pipeline: `Scaler → SelectFromModel → Random Forest`")
+        st.markdown("- Seleksi fitur dari 87 → 10 fitur terbaik")
+        st.markdown("- Berdasarkan *feature importance* Random Forest")
+        st.markdown("- Terintegrasi dalam Pipeline → **No Data Leakage**")
+        st.markdown("- Urutan: `Scaler → SelectFromModel → Random Forest`")
 
 st.divider()
 
 # ======================
-# TAB: INPUT MANUAL & CSV
+# TAB NAVIGASI
 # ======================
 
 tab1, tab2 = st.tabs(["🧠 Input Manual", "📁 Upload CSV"])
 
-# ---- TAB 1: INPUT MANUAL (hanya 2 fitur) ----
+# ---- TAB 1: INPUT MANUAL ----
 with tab1:
     st.markdown("### Input Nilai Fitur")
     st.caption(
-        "Masukkan nilai dua fitur utama jaringan IoT. "
-        "Data akan diproses otomatis melalui Pipeline: Scaler → Feature Selection → Model."
+        "Isi 10 fitur utama di bawah. Fitur lainnya otomatis bernilai 0. "
+        "Data lengkap (87 fitur) dikirim ke Pipeline: Scaler → Feature Selection → Model."
     )
 
+    input_values = {col: 0.0 for col in ALL_FEATURES}
+
     col_a, col_b = st.columns(2)
-    with col_a:
-        src_bytes = st.number_input(
-            label="src_bytes  (Jumlah byte dari sumber)",
-            value=0.0,
-            format="%.4f",
-            key="fi_src_bytes"
-        )
-    with col_b:
-        dst_bytes = st.number_input(
-            label="dst_bytes  (Jumlah byte ke tujuan)",
-            value=0.0,
-            format="%.4f",
-            key="fi_dst_bytes"
-        )
+    for i, fname in enumerate(TOP_FEATURES):
+        col = col_a if i % 2 == 0 else col_b
+        with col:
+            input_values[fname] = st.number_input(
+                label=fname,
+                value=0.0,
+                format="%.4f",
+                key=f"fi_{fname}"
+            )
 
     st.markdown("")
 
     if st.button("🔍 Prediksi", key="btn_manual", use_container_width=True):
         try:
-            data_input = pd.DataFrame([{
-                "src_bytes": src_bytes,
-                "dst_bytes": dst_bytes
-            }])
+            # Kirim semua 87 kolom, dengan nilai dari input atau 0
+            data_input = pd.DataFrame([input_values])[ALL_FEATURES]
             hasil = model.predict(data_input)
             st.success(f"🎯 Hasil Prediksi: **{hasil[0]}**")
 
@@ -150,14 +187,13 @@ with tab1:
 
         except Exception as e:
             st.error(f"❌ Error: {e}")
-            st.caption("Pastikan nama kolom sesuai dengan fitur yang digunakan saat training.")
 
 # ---- TAB 2: UPLOAD CSV ----
 with tab2:
     st.markdown("### Upload Dataset CSV")
     st.caption(
-        "Upload file CSV dengan kolom fitur yang **sama persis** "
-        "seperti saat training (tanpa kolom label/target)."
+        "Upload file CSV dengan **87 kolom fitur** yang sama persis seperti saat training "
+        "(tanpa kolom `Attack_sub_category`)."
     )
 
     uploaded_file = st.file_uploader(
@@ -172,14 +208,29 @@ with tab2:
             st.markdown(f"**Preview:** {len(data)} baris · {len(data.columns)} kolom")
             st.dataframe(data.head(), use_container_width=True)
 
+            # Validasi kolom
+            missing_cols = [c for c in ALL_FEATURES if c not in data.columns]
+            extra_cols   = [c for c in data.columns if c not in ALL_FEATURES]
+
+            if missing_cols:
+                st.warning(f"⚠️ Kolom berikut tidak ditemukan di CSV: {missing_cols[:5]}{'...' if len(missing_cols)>5 else ''}")
+            if extra_cols:
+                st.info(f"ℹ️ Kolom berikut akan diabaikan: {extra_cols[:5]}{'...' if len(extra_cols)>5 else ''}")
+
             if st.button("🔍 Prediksi Dataset", key="btn_csv", use_container_width=True):
                 with st.spinner("Memproses melalui Pipeline..."):
-                    prediksi = model.predict(data)
-                    data_hasil = data.copy()
+                    # Pastikan urutan kolom benar, kolom yang hilang diisi 0
+                    for col in ALL_FEATURES:
+                        if col not in data.columns:
+                            data[col] = 0.0
+                    data_ordered = data[ALL_FEATURES]
+
+                    prediksi = model.predict(data_ordered)
+                    data_hasil = data_ordered.copy()
                     data_hasil["Prediction"] = prediksi
 
                     if hasattr(model, "predict_proba"):
-                        proba_batch = model.predict_proba(data)
+                        proba_batch = model.predict_proba(data_ordered)
                         for i, c in enumerate(model.classes_):
                             data_hasil[f"Prob_{c}"] = proba_batch[:, i].round(4)
 
@@ -203,7 +254,6 @@ with tab2:
 
         except Exception as e:
             st.error(f"❌ Error: {e}")
-            st.caption("Pastikan file CSV valid dan kolomnya sesuai fitur training.")
 
 # ======================
 # FOOTER
