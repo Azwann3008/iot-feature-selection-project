@@ -80,6 +80,39 @@ with col3:
 st.divider()
 
 # ======================
+# PREDIKSI DATASET CSV
+# ======================
+
+st.divider()
+
+st.header("📁 Upload Dataset CSV")
+
+uploaded_file = st.file_uploader(
+    "Upload file CSV untuk diprediksi",
+    type=["csv"]
+)
+
+if uploaded_file is not None:
+
+    data = pd.read_csv(uploaded_file)
+
+    st.write("Preview Dataset:")
+    st.dataframe(data.head())
+
+    try:
+        prediksi = model.predict(data)
+
+        data["Prediction"] = prediksi
+
+        st.success("Prediksi berhasil dilakukan!")
+
+        st.write("Hasil Prediksi:")
+        st.dataframe(data.head())
+
+    except Exception as e:
+        st.error(f"Terjadi error: {e}")
+
+# ======================
 # UPLOAD CSV
 # ======================
 
