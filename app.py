@@ -1,22 +1,123 @@
 import streamlit as st
 import joblib
+import pandas as pd
 
-# Load model
+# ======================
+# CONFIG
+# ======================
+
+st.set_page_config(
+    page_title="IoT Vulnerability Detection",
+    page_icon="🔐",
+    layout="wide"
+)
+
+# ======================
+# LOAD MODEL
+# ======================
+
 model = joblib.load("pipeline_terbaik.pkl")
 
-st.title("IoT Vulnerability Detection")
+# ======================
+# SIDEBAR
+# ======================
 
-st.success("Aplikasi Streamlit berhasil dijalankan!")
+st.sidebar.title("🔐 IoT Security")
 
-# Input
-feature1 = st.number_input("Feature 1")
-feature2 = st.number_input("Feature 2")
+st.sidebar.markdown("## Project Information")
 
-# Prediksi
+st.sidebar.markdown("### Dataset")
+st.sidebar.write("IoT Vulnerability Dataset")
+
+st.sidebar.markdown("### Feature Selection")
+st.sidebar.write("Embedded Method (SelectFromModel)")
+
+st.sidebar.markdown("### Classifier")
+st.sidebar.write("Random Forest")
+
+st.sidebar.markdown("### Cross Validation")
+st.sidebar.write("Stratified K-Fold (5 Fold)")
+
+st.sidebar.markdown("---")
+
+st.sidebar.markdown("## Model Performance")
+st.sidebar.metric("Accuracy", "90.03%")
+st.sidebar.metric("F1 Score", "86.71%")
+
+# ======================
+# MAIN PAGE
+# ======================
+
+st.title("🔐 IoT Vulnerability Detection System")
+
+st.write("""
+Sistem ini digunakan untuk mendeteksi jenis serangan pada trafik IoT menggunakan:
+""")
+
+st.markdown("""
+- StandardScaler
+- Embedded Feature Selection
+- Random Forest Classifier
+""")
+
+st.success("Pipeline berhasil dimuat (pipeline_terbaik.pkl)")
+
+# ======================
+# INFO BOX
+# ======================
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.info("📊 Balanced Dataset")
+
+with col2:
+    st.info("🌲 Random Forest")
+
+with col3:
+    st.info("⚙️ Embedded Feature Selection")
+
+st.divider()
+
+# ======================
+# INPUT MANUAL
+# ======================
+
+st.header("Input Manual Prediksi")
+
+feature1 = st.number_input("Feature 1", value=0.0)
+feature2 = st.number_input("Feature 2", value=0.0)
+
 if st.button("Prediksi"):
+    hasil = model.predict([[feature1, feature2]])
 
-    data_baru = [[feature1, feature2]]
+    st.success("Prediksi berhasil!")
 
-    hasil = model.predict(data_baru)
+    st.write("Hasil Prediksi:")
+    st.write(hasil)
 
-    st.success(f"Hasil Prediksi: {hasil[0]}")
+# ======================
+# UPLOAD CSV
+# ======================
+
+st.divider()
+
+st.header("📁 Upload Dataset CSV")
+
+uploaded_file = st.file_uploader(
+    "Upload file CSV untuk diprediksi",
+    type=["csv"]
+)
+
+if uploaded_file is not None:
+    data = pd.read_csv(uploaded_file)
+
+    st.write("Preview Dataset:")
+    st.dataframe(data.head())
+
+    prediksi = model.predict(data)
+
+    data["Prediction"] = prediksi
+
+    st.write("Hasil Prediksi:")
+    st.dataframe(data.head())
