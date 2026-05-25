@@ -80,23 +80,6 @@ with col3:
 st.divider()
 
 # ======================
-# INPUT MANUAL
-# ======================
-
-st.header("Input Manual Prediksi")
-
-feature1 = st.number_input("Feature 1", value=0.0)
-feature2 = st.number_input("Feature 2", value=0.0)
-
-if st.button("Prediksi"):
-    hasil = model.predict([[feature1, feature2]])
-
-    st.success("Prediksi berhasil!")
-
-    st.write("Hasil Prediksi:")
-    st.write(hasil)
-
-# ======================
 # UPLOAD CSV
 # ======================
 
