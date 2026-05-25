@@ -77,37 +77,37 @@ with col2:
 with col3:
     st.info("⚙️ Embedded Feature Selection")
 
-st.divider()
-
 # ======================
-# PREDIKSI DATASET CSV
+# INPUT MANUAL
 # ======================
 
 st.divider()
 
-st.header("📁 Upload Dataset CSV")
+st.header("🧠 Input Manual Prediksi")
 
-uploaded_file = st.file_uploader(
-    "Upload file CSV untuk diprediksi",
-    type=["csv"]
+feature1 = st.number_input(
+    "Feature 1",
+    value=0.0,
+    key="f1"
 )
 
-if uploaded_file is not None:
+feature2 = st.number_input(
+    "Feature 2",
+    value=0.0,
+    key="f2"
+)
 
-    data = pd.read_csv(uploaded_file)
-
-    st.write("Preview Dataset:")
-    st.dataframe(data.head())
+if st.button("Prediksi", key="btn_prediksi"):
 
     try:
-        prediksi = model.predict(data)
+        data_baru = [[feature1, feature2]]
 
-        data["Prediction"] = prediksi
+        hasil = model.predict(data_baru)
 
-        st.success("Prediksi berhasil dilakukan!")
+        st.success("Prediksi berhasil!")
 
         st.write("Hasil Prediksi:")
-        st.dataframe(data.head())
+        st.write(hasil[0])
 
     except Exception as e:
         st.error(f"Terjadi error: {e}")
@@ -122,18 +122,35 @@ st.header("📁 Upload Dataset CSV")
 
 uploaded_file = st.file_uploader(
     "Upload file CSV untuk diprediksi",
-    type=["csv"]
+    type=["csv"],
+    key="upload_csv"
 )
 
 if uploaded_file is not None:
-    data = pd.read_csv(uploaded_file)
 
-    st.write("Preview Dataset:")
-    st.dataframe(data.head())
+    try:
+        data = pd.read_csv(uploaded_file)
 
-    prediksi = model.predict(data)
+        st.write("Preview Dataset:")
+        st.dataframe(data.head())
 
-    data["Prediction"] = prediksi
+        prediksi = model.predict(data)
 
-    st.write("Hasil Prediksi:")
-    st.dataframe(data.head())
+        data["Prediction"] = prediksi
+
+        st.success("Prediksi dataset berhasil!")
+
+        st.write("Hasil Prediksi:")
+        st.dataframe(data.head())
+
+        csv = data.to_csv(index=False).encode("utf-8")
+
+        st.download_button(
+            label="⬇️ Download Hasil Prediksi",
+            data=csv,
+            file_name="hasil_prediksi.csv",
+            mime="text/csv"
+        )
+
+    except Exception as e:
+        st.error(f"Terjadi error saat prediksi dataset: {e}")
