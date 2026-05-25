@@ -1,22 +1,22 @@
 import streamlit as st
+import joblib
 
-st.set_page_config(
-    page_title="IoT Vulnerability Detection",
-    layout="centered"
-)
+# Load model
+model = joblib.load("pipeline_terbaik.pkl")
 
 st.title("IoT Vulnerability Detection")
 
 st.success("Aplikasi Streamlit berhasil dijalankan!")
 
-st.write("""
-Model Machine Learning berhasil di-load menggunakan pipeline_terbaik.pkl
-""")
+# Input
+feature1 = st.number_input("Feature 1")
+feature2 = st.number_input("Feature 2")
 
-st.subheader("Demo Input")
-
-feature_1 = st.number_input("Feature 1")
-feature_2 = st.number_input("Feature 2")
-
+# Prediksi
 if st.button("Prediksi"):
-    st.success("Prediksi berhasil dijalankan!")
+
+    data_baru = [[feature1, feature2]]
+
+    hasil = model.predict(data_baru)
+
+    st.success(f"Hasil Prediksi: {hasil[0]}")
