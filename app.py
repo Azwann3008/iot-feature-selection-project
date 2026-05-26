@@ -18,8 +18,12 @@ import numpy as np
 st.set_page_config(
     page_title="IoT Vulnerability Detection",
     page_icon="🔐",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
+
+# Naikkan batas upload ke 1GB
+st._config.set_option("server.maxUploadSize", 1024)
 
 # ============================================================
 # DAFTAR 87 KOLOM FITUR (urutan sesuai training)
@@ -192,7 +196,7 @@ with col2:
 with col3:
     with st.expander("⚙️ Embedded Feature Selection", expanded=False):
         st.markdown("##### SelectFromModel (Embedded Method)")
-        st.markdown("- Seleksi fitur dari **87 → 10 fitur terbaik**")
+        st.markdown("- Seleksi fitur dari **87 → 15 fitur terbaik**")
         st.markdown("- Berdasarkan *feature importance* dari Random Forest")
         st.markdown("- Terintegrasi **di dalam Pipeline** → No Data Leakage")
         st.markdown("- Fitur di bawah threshold importance otomatis dibuang")
@@ -242,6 +246,7 @@ with st.expander("📖 Cara Penggunaan Aplikasi", expanded=False):
     - Kolom `Attack_sub_category` (label) **tidak boleh ada** di CSV.
     - Kolom yang kurang akan otomatis diisi nilai 0.
     - Tekan **Prediksi Dataset** lalu unduh hasilnya.
+    - Batas ukuran file: **1 GB**.
 
     > ⚠️ Pipeline memuat Scaler dan Feature Selection secara otomatis.
     > Tidak diperlukan preprocessing manual sebelum input data ke UI ini.
@@ -318,7 +323,7 @@ with tab2:
     st.markdown("### Prediksi Batch via File CSV")
     st.caption(
         "Upload CSV dengan 87 kolom fitur (tanpa kolom `Attack_sub_category`). "
-        "Kolom yang kurang akan diisi nilai 0 secara otomatis."
+        "Kolom yang kurang akan diisi nilai 0 secara otomatis. Batas ukuran: **1 GB**."
     )
 
     uploaded_file = st.file_uploader(
