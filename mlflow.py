@@ -84,7 +84,8 @@ print(f"      X_train: {X_train.shape}, X_test: {X_test.shape}")
 #                  'model__max_depth': 10,
 #                  'model__n_estimators': 100}
 #    Best CV Accuracy: 0.9909
-#    Parameter diisi secara STATIS — tidak ada pencarian ulang
+#    Parameter diisi secara STATIS — tidak ada pencarian ulanggit commit -m "Fix: pin scikit-learn==1.8.0, update mlflow.py"
+
 # ============================================================
 
 BEST_PARAMS = {
