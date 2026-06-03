@@ -79,25 +79,31 @@ print(f"      X_train: {X_train.shape}, X_test: {X_test.shape}")
 
 # ============================================================
 # 3. PARAMETER TERBAIK (hasil Tahap 7 di Notebook)
+#    Diperoleh dari GridSearchCV:
+#    Best Params: {'feature_selection__max_features': 15,
+#                  'model__max_depth': 10,
+#                  'model__n_estimators': 100}
+#    Best CV Accuracy: 0.9909
 #    Parameter diisi secara STATIS — tidak ada pencarian ulang
 # ============================================================
 
 BEST_PARAMS = {
-    # Parameter Feature Selection
-    "feature_selection_method" : "SelectFromModel (Embedded)",
-    "feature_selection_max_features": 10,
+    # Parameter Feature Selection — hasil GridSearchCV Tahap 7
+    "feature_selection_method"      : "SelectFromModel (Embedded)",
+    "feature_selection_max_features": 15,   # ← hasil GridSearch: max_features=15
 
     # Parameter Model — hasil GridSearchCV di Notebook
-    "model_n_estimators" : 100,
-    "model_max_depth"    : 10,
-    "model_min_samples_split": 2,
-    "model_min_samples_leaf" : 1,
-    "model_random_state" : 42,
+    "model_n_estimators"            : 100,
+    "model_max_depth"               : 10,
+    "model_min_samples_split"       : 2,
+    "model_min_samples_leaf"        : 1,
+    "model_random_state"            : 42,
 
     # Info tambahan
-    "scaler"             : "StandardScaler",
-    "cv_strategy"        : "StratifiedKFold(n_splits=5)",
-    "dataset"            : "IoT Vulnerability (Preprocessed Balanced)",
+    "scaler"                        : "StandardScaler",
+    "cv_strategy"                   : "StratifiedKFold(n_splits=3)",
+    "tuning_method"                 : "GridSearchCV",
+    "dataset"                       : "IoT Vulnerability (Preprocessed Balanced)",
 }
 
 # ============================================================
@@ -114,6 +120,7 @@ with mlflow.start_run(run_name="Pipeline_Embedded_RF_BestParams"):
 
     # --------------------------------------------------
     # Bangun Pipeline dengan parameter terbaik (statis)
+    # Urutan: StandardScaler → SelectFromModel → RandomForest
     # --------------------------------------------------
     pipeline = Pipeline([
         (
@@ -206,8 +213,8 @@ with mlflow.start_run(run_name="Pipeline_Embedded_RF_BestParams"):
     print("=" * 55)
     print("  HASIL EVALUASI (Test Set)")
     print("=" * 55)
-    print(f"  Accuracy        : {accuracy:.4f}  ({accuracy*100:.2f}%)")
-    print(f"  F1 Score (macro): {f1:.4f}  ({f1*100:.2f}%)")
+    print(f"  Accuracy         : {accuracy:.4f}  ({accuracy*100:.2f}%)")
+    print(f"  F1 Score (macro) : {f1:.4f}  ({f1*100:.2f}%)")
     print(f"  Precision (macro): {precision:.4f}")
     print(f"  Recall (macro)   : {recall:.4f}")
     print("=" * 55)
