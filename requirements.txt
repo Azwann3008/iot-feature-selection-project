@@ -7,4 +7,8 @@ joblib==1.5.0
 mlflow==2.22.0
 matplotlib==3.10.3
 seaborn==0.13.2
+<<<<<<< HEAD
 requests==2.32.3
+=======
+requests==2.32.3    
+>>>>>>> 822c4fd (Fix: pin scikit-learn==1.8.0, update all files)
